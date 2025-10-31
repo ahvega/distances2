@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(move css .old/)",
+      "Bash(move distances.html .old/)",
+      "Bash(move images .old/)",
+      "Bash(move js .old/)",
+      "Bash(move themes .old/)",
+      "Bash(move css .old )",
+      "Bash(move distances.html .old )",
+      "Bash(move images .old )",
+      "Bash(move js .old )",
+      "Bash(move themes .old)",
+      "Bash(powershell:*)",
+      "Bash(npx create-next-app:*)",
+      "Bash(npm install:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm run dev:*)"
+    ],
+    "deny": []
+  }
+}
