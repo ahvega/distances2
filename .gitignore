@@ -109,3 +109,5 @@ geocoding-cache/
 quotations-export/
 temp-exports/
 user-data/
+experimental/
+.old/

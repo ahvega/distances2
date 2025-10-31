@@ -72,8 +72,18 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-base-200">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100">
+      <div className="container mx-auto px-4 py-6">
+        {/* Top bar */}
+        <div className="flex items-center justify-between mb-6">
+          <a href="/" className="btn btn-outline btn-sm">
+            <i className="fas fa-arrow-left"></i>
+            Volver a Cotización
+          </a>
+          <div>
+            {/* Keep actions on the right if needed, e.g., theme toggle */}
+          </div>
+        </div>
         {/* Header */}
         <div className="mb-8">
           <div className="breadcrumbs text-sm">

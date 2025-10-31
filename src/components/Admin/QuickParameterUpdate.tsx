@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Dialog, Input, Select, Button } from '@/components/ui';
 import { parameterManagementService } from '@/services/ParameterManagementService';
 import type { SystemParameters } from '@/types';
 
@@ -140,37 +141,35 @@ export default function QuickParameterUpdate({
     switch (parameterInfo.type) {
       case 'number':
         return (
-          <input
+          <Input
             type="number"
-            className="input input-bordered w-full"
-            value={value as number}
-            onChange={(e) => setValue(parseFloat(e.target.value) || 0)}
+            value={String(value ?? '')}
+            onChange={(e) => setValue((e.target as HTMLInputElement).value)}
             min={parameterInfo.min || 0}
             step={parameterInfo.step || 0.01}
             disabled={saving}
+            fullWidth
           />
         );
 
       case 'boolean':
         return (
-          <div className="form-control">
-            <label className="label cursor-pointer">
-              <span className="label-text">Enable</span>
-              <input
-                type="checkbox"
-                className="checkbox"
-                checked={value as boolean}
-                onChange={(e) => setValue(e.target.checked)}
-                disabled={saving}
-              />
-            </label>
-          </div>
+          <label className="inline-flex items-center gap-2">
+            <span className="text-sm">Enable</span>
+            <input
+              type="checkbox"
+              className="h-5 w-5 rounded border-gray-300 dark:border-gray-600 text-blue-600"
+              checked={value as boolean}
+              onChange={(e) => setValue(e.target.checked)}
+              disabled={saving}
+            />
+          </label>
         );
 
       case 'select':
         return (
           <select
-            className="select select-bordered w-full"
+            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
             value={value as string}
             onChange={(e) => setValue(e.target.value)}
             disabled={saving}
@@ -185,99 +184,64 @@ export default function QuickParameterUpdate({
 
       default:
         return (
-          <input
+          <Input
             type="text"
-            className="input input-bordered w-full"
-            value={value as string}
-            onChange={(e) => setValue(e.target.value)}
+            value={String(value ?? '')}
+            onChange={(e) => setValue((e.target as HTMLInputElement).value)}
             disabled={saving}
+            fullWidth
           />
         );
     }
   };
 
   return (
-    <div className="modal modal-open">
-      <div className="modal-box">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="avatar placeholder">
-            <div className="bg-primary text-primary-content rounded-full w-10 h-10">
-              <i className={`fas ${parameterInfo.icon}`}></i>
-            </div>
-          </div>
-          <div>
-            <h3 className="font-bold text-lg">Update {parameterInfo.title}</h3>
-            {parameterInfo.unit && (
-              <p className="text-sm text-base-content/60">{parameterInfo.unit}</p>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text font-medium">Current Value</span>
-            </label>
-            <div className="bg-base-200 p-3 rounded-lg">
-              <span className="font-mono">
-                {typeof currentValue === 'boolean'
-                  ? (currentValue ? 'Enabled' : 'Disabled')
-                  : currentValue
-                }
-                {parameterInfo.unit && ` ${parameterInfo.unit}`}
-              </span>
-            </div>
-          </div>
-
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text font-medium">New Value</span>
-            </label>
-            {renderInput()}
-          </div>
-
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text font-medium">Reason (Optional)</span>
-            </label>
-            <textarea
-              className="textarea textarea-bordered"
-              placeholder="Describe the reason for this change..."
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              rows={2}
-              disabled={saving}
-            />
-          </div>
-        </div>
-
-        <div className="modal-action">
-          <button
-            className="btn btn-outline"
-            onClick={onClose}
-            disabled={saving}
-          >
+    <Dialog
+      open={true}
+      onOpenChange={(o) => !o && onClose?.()}
+      title={`Update ${parameterInfo.title}`}
+      description={parameterInfo.unit}
+      footer={
+        <>
+          <Button onClick={onClose} className="inline-flex items-center gap-2" disabled={saving}>
+            <i className="fas fa-times" />
             Cancel
-          </button>
-          <button
-            className="btn btn-primary"
-            onClick={handleSave}
-            disabled={saving || value === currentValue}
-          >
-            {saving ? (
-              <>
-                <span className="loading loading-spinner loading-sm"></span>
-                Saving...
-              </>
-            ) : (
-              <>
-                <i className="fas fa-save"></i>
-                Save Changes
-              </>
-            )}
-          </button>
+          </Button>
+          <Button onClick={handleSave} className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white" disabled={saving || value === currentValue}>
+            <i className="fas fa-save" />
+            Save Changes
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <div>
+          <div className="text-sm font-medium mb-1">Current Value</div>
+          <div className="bg-gray-100 dark:bg-gray-800/60 p-3 rounded-lg">
+            <span className="font-mono">
+              {typeof currentValue === 'boolean' ? (currentValue ? 'Enabled' : 'Disabled') : currentValue}
+              {parameterInfo.unit && ` ${parameterInfo.unit}`}
+            </span>
+          </div>
+        </div>
+
+        <div>
+          <div className="text-sm font-medium mb-1">New Value</div>
+          {renderInput()}
+        </div>
+
+        <div>
+          <div className="text-sm font-medium mb-1">Reason (Optional)</div>
+          <textarea
+            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
+            placeholder="Describe the reason for this change..."
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            rows={2}
+            disabled={saving}
+          />
         </div>
       </div>
-    </div>
+    </Dialog>
   );
 }

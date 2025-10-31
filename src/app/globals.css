@@ -60,7 +60,7 @@
 }
 
 /* Dark mode color overrides */
-[data-theme="dark"] {
+.dark {
   --color-primary-50: #172554;
   --color-primary-100: #1e3a8a;
   --color-primary-900: #dbeafe;
@@ -85,6 +85,7 @@ html, body {
 .mono-font {
   font-family: 'IBM Plex Mono', monospace;
   font-weight: 500;
+  font-variant-numeric: tabular-nums slashed-zero;
 }
 
 /* Custom scrollbar */
@@ -97,7 +98,7 @@ html, body {
   background: #f1f1f1;
 }
 
-[data-theme="dark"] ::-webkit-scrollbar-track {
+ .dark ::-webkit-scrollbar-track {
   background: #374151;
 }
 
@@ -152,6 +153,12 @@ html, body {
 /* Modern card styles */
 .modern-card {
   @apply bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-slate-600 transition-all duration-200;
+}
+
+/* OS-style window surface helper */
+.os-window {
+  @apply rounded-xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-800/90 backdrop-blur-xl;
+  box-shadow: 0 36px 72px -36px rgba(0,0,0,0.5), 0 18px 36px -28px rgba(0,0,0,0.35), 0 8px 20px -12px rgba(0,0,0,0.25);
 }
 
 .modern-card:hover {

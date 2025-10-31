@@ -20,6 +20,8 @@
   "dependencies": {
     "@headlessui/react": "^2.2.9",
     "@hookform/resolvers": "^5.2.2",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-popover": "^1.1.15",
     "daisyui": "^5.3.7",
     "next": "15.5.6",
     "react": "19.1.0",
@@ -35,10 +37,15 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.21",
-    "eslint": "^9",
+    "es-abstract": "^1.24.0",
+    "eslint": "^8.57.0",
     "eslint-config-next": "15.5.6",
     "postcss": "^8.5.6",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "overrides": {
+    "eslint-plugin-react": "7.34.1",
+    "array.prototype.tosorted": "1.1.3"
   }
 }

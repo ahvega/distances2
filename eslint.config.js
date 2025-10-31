@@ -19,7 +19,9 @@ const eslintConfig = [
         "varsIgnorePattern": "^_"
       }],
       "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/prefer-const": "error",
+      // prefer-const is a core ESLint rule
+      // Remove the plugin variant to avoid rule resolution errors in flat config
+      // and keep the core rule below.
 
       // React specific rules
       "react/jsx-key": "error",

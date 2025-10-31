@@ -6,17 +6,18 @@ import { useTheme } from '@/context/ThemeContext';
 export default function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
 
+  const isDark = theme === 'business';
+  const title = isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
+
   return (
-    <label className="swap swap-rotate btn btn-ghost btn-circle">
-      <input
-        type="checkbox"
-        className="theme-controller"
-        checked={theme === 'business'}
-        onChange={toggleTheme}
-        aria-label={`Switch to ${theme === 'corporate' ? 'dark' : 'light'} mode`}
-      />
-      <i className="fas fa-sun swap-off text-lg"></i>
-      <i className="fas fa-moon swap-on text-lg"></i>
-    </label>
+    <button
+      type="button"
+      onClick={toggleTheme}
+      className="btn btn-ghost btn-circle"
+      aria-label={title}
+      title={title}
+    >
+      <i className={`fas ${isDark ? 'fa-sun' : 'fa-moon'} text-lg`}></i>
+    </button>
   );
 }

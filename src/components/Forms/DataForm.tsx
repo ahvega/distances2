@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { quotationFormSchema, type QuotationFormData } from '@/utils/validation';
 import { useAppContext } from '@/context/AppContext';
 import { PlaceResult } from '@/hooks/useGooglePlaces';
-import { Button, Input, Card, Badge } from '@/components/ui';
+import { Button, Input, Card, Badge, ComboBox } from '@/components/ui';
 import { CardContent } from '@/components/ui/Card';
 import LocationInput from './LocationInput';
 import RangeSlider from './RangeSlider';
@@ -63,6 +63,26 @@ export default function DataForm({ onSubmit, loading: externalLoading }: DataFor
       payload: { vehiculos: vehicleArray.map(v => v.id || (v as any).slug) }
     });
   }, [dispatch]);
+
+  // Suggest vehicles automatically based on group size (greedy capacity fill)
+  React.useEffect(() => {
+    if (!groupSize || availableVehicles.length === 0) return;
+    const byCapacity = [...availableVehicles].sort((a: any, b: any) => (b.capacidad_real || b.passengerCapacity || 0) - (a.capacidad_real || a.passengerCapacity || 0));
+    const result: any[] = [];
+    let remaining = groupSize;
+    for (const v of byCapacity) {
+      const cap = v.capacidad_real || v.passengerCapacity || 0;
+      if (cap <= 0) continue;
+      if (remaining > 0) {
+        result.push(v);
+        remaining -= cap;
+        if (remaining <= 0) break;
+      }
+    }
+    if (result.length > 0) {
+      handleVehicleSelect(result);
+    }
+  }, [groupSize, availableVehicles]);
 
   const handleLocationChange = React.useCallback((field: 'origin' | 'destination' | 'baseLocation', value: string) => {
     setValue(field, value);
@@ -171,11 +191,18 @@ export default function DataForm({ onSubmit, loading: externalLoading }: DataFor
               <span>Selección de Vehículo</span>
             </label>
             <div className="bg-slate-700/30 border border-slate-600/50 rounded-xl p-4">
-              <VehicleSelection
-                vehicles={availableVehicles}
-                groupSize={groupSize || 1}
-                onVehicleSelect={handleVehicleSelect}
-                selectedVehicle={selectedVehicles}
+              <ComboBox
+                options={availableVehicles.map((v: any) => ({ value: v.id || v.slug, label: (v.nombre || `${v.make ?? ''} ${v.model ?? ''}`).trim() }))}
+                value={selectedVehicles.map(v => (v.id || (v as any).slug))}
+                onChange={(vals) => {
+                  const vehiclesMap = new Map<string, any>();
+                  for (const v of availableVehicles as any[]) {
+                    vehiclesMap.set(v.id || v.slug, v);
+                  }
+                  const picked = vals.map(id => vehiclesMap.get(id)).filter(Boolean);
+                  handleVehicleSelect(picked as any[]);
+                }}
+                placeholder="Selecciona vehículos (múltiple)"
               />
             </div>
             {availableVehicles.length === 0 && (groupSize || 0) > 0 && (

@@ -7,6 +7,7 @@ import PricingDisplay from '@/components/Pricing/PricingDisplay';
 import MapComponent from '@/components/Map/MapComponent';
 import CostsDisplay from '@/components/Costs/CostsDisplay';
 import ThemeToggle from '@/components/Common/ThemeToggle';
+import { Panel } from '@/components/ui';
 
 const tabs = [
   { id: 'datos', label: 'Datos', icon: 'fas fa-edit', color: 'from-blue-500 to-cyan-500' },
@@ -25,65 +26,53 @@ export default function MobileLayout() {
       case 'datos':
         return (
           <div className="p-4">
-            <div className="card bg-base-100 shadow-xl">
-              <div className="card-body">
-                <div className="card-title">
-                  <div className="badge badge-primary badge-lg">
-                    <i className="fas fa-edit mr-2"></i>
-                    Datos del Viaje
-                  </div>
-                </div>
-                <DataForm />
-              </div>
-            </div>
+            <Panel
+              title="Datos del Viaje"
+              subtitle="Configure su cotización"
+              icon="fas fa-edit"
+              headerGradient="from-blue-500 to-cyan-500"
+            >
+              <DataForm />
+            </Panel>
           </div>
         );
       case 'precios':
         return (
           <div className="p-4">
-            <div className="card bg-base-100 shadow-xl">
-              <div className="card-body">
-                <div className="card-title">
-                  <div className="badge badge-secondary badge-lg">
-                    <i className="fas fa-tag mr-2"></i>
-                    Cotización
-                  </div>
-                </div>
-                <PricingDisplay />
-              </div>
-            </div>
+            <Panel
+              title="Cotización"
+              subtitle="Resumen y totales"
+              icon="fas fa-tag"
+              headerGradient="from-purple-500 to-pink-500"
+            >
+              <PricingDisplay />
+            </Panel>
           </div>
         );
       case 'mapa':
         return (
           <div className="p-4">
-            <div className="card bg-base-100 shadow-xl">
-              <div className="card-body">
-                <div className="card-title">
-                  <div className="badge badge-success badge-lg">
-                    <i className="fas fa-map-marker-alt mr-2"></i>
-                    Ruta y Distancia
-                  </div>
-                </div>
-                <MapComponent />
-              </div>
-            </div>
+            <Panel
+              title="Ruta y Distancia"
+              subtitle="Visualización del recorrido"
+              icon="fas fa-map-marker-alt"
+              headerGradient="from-green-500 to-emerald-500"
+            >
+              <MapComponent />
+            </Panel>
           </div>
         );
       case 'gastos':
         return (
           <div className="p-4">
-            <div className="card bg-base-100 shadow-xl">
-              <div className="card-body">
-                <div className="card-title">
-                  <div className="badge badge-accent badge-lg">
-                    <i className="fas fa-calculator mr-2"></i>
-                    Costos Detallados
-                  </div>
-                </div>
-                <CostsDisplay />
-              </div>
-            </div>
+            <Panel
+              title="Costos Detallados"
+              subtitle="Desglose por categoría"
+              icon="fas fa-calculator"
+              headerGradient="from-orange-500 to-red-500"
+            >
+              <CostsDisplay />
+            </Panel>
           </div>
         );
       default:

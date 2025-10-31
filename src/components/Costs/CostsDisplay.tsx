@@ -83,7 +83,7 @@ export default function CostsDisplay({ costs: propCosts, vehicle: propVehicle, c
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-gray-900 dark:text-gray-100">
       {calculations.map((calc, index) => (
         <div key={index} className="border rounded-lg overflow-hidden">
           <div className="bg-plannertours-blue text-white p-3">

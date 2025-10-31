@@ -1,10 +1,11 @@
-// Modern UI Component Library
-// Accessible components built with Headless UI and Tailwind CSS
-
+export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './Card';
 export { Button } from './Button';
-export { Input } from './Input';
-export { Select } from './Select';
-export { Card } from './Card';
 export { Badge } from './Badge';
+export { Input } from './Input';
 export { Modal } from './Modal';
 export { Tooltip } from './Tooltip';
+export { Select } from './Select';
+export { default as ComboBox } from './ComboBox';
+export { default as MultiSelect } from './MultiSelect';
+export { default as Panel } from './Panel';
+export { default as Dialog } from './Dialog';

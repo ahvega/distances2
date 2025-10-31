@@ -125,7 +125,7 @@ export default function VehicleSelection(props: VehicleSelectionProps) {
 
   return (
     <div className="space-y-3">
-      <div className="space-y-2 max-h-48 overflow-y-auto p-1">
+      <div className="grid grid-cols-1 gap-3 p-1">
         {vehicles.map((vehicle: any) => {
           const capacity = getVehicleCapacity(vehicle);
           const name = getVehicleName(vehicle);
@@ -172,32 +172,32 @@ export default function VehicleSelection(props: VehicleSelectionProps) {
                     </div>
 
                     <div className="flex items-center space-x-3">
-                      <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-slate-600 to-slate-700 rounded-lg">
-                        <i className="fas fa-car text-slate-300"></i>
+                      <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-slate-600 to-slate-700 rounded-lg">
+                        <i className="fas fa-car text-slate-300 text-sm"></i>
                       </div>
                       <div>
-                        <div className="font-semibold text-slate-100">{name}</div>
-                        <div className="text-sm text-slate-400">
+                        <div className="font-semibold text-gray-900 dark:text-gray-100">{name}</div>
+                        <div className="hidden">
                           {vehicle.year && `${vehicle.year} • `}Capacidad: {capacity} pasajeros
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-2">
+                  <div className="hidden">
                     {canAccommodate ? (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      <span className="inline-flex items-center text-xs text-emerald-600 dark:text-emerald-400">
                         <i className="fas fa-check mr-1"></i>
                         Disponible
                       </span>
                     ) : (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/20 text-red-300 border border-red-500/30">
+                      <span className="inline-flex items-center text-xs text-red-600 dark:text-red-400">
                         <i className="fas fa-times mr-1"></i>
                         Sin capacidad
                       </span>
                     )}
-                    {isSelected && (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                    {false && isSelected && (
+                      <span className="inline-flex items-center text-xs text-blue-500">
                         <i className="fas fa-star mr-1"></i>
                         Seleccionado
                       </span>
@@ -206,9 +206,14 @@ export default function VehicleSelection(props: VehicleSelectionProps) {
                 </div>
               </div>
 
-              {/* Vehicle specifications with enhanced layout */}
+              {/* Vehicle specs in single column */}
               <div className="p-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  {/* Capacity row */}
+                  <div className="text-sm text-gray-700 dark:text-gray-300 flex items-center justify-between">
+                    <span>Capacidad</span>
+                    <span className="font-medium">{capacity} pasajeros</span>
+                  </div>
                   {/* Performance metrics */}
                   <div className="space-y-3">
                     <h4 className="text-sm font-semibold text-slate-300 flex items-center">
@@ -262,8 +267,8 @@ export default function VehicleSelection(props: VehicleSelectionProps) {
                   </div>
                 </div>
 
-                {/* Capacity visualization */}
-                <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                {/* Capacity visualization (removed per new layout) */}
+                <div className="hidden">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Capacidad de pasajeros
@@ -296,7 +301,7 @@ export default function VehicleSelection(props: VehicleSelectionProps) {
                 </div>
 
                 {/* Action button for better UX */}
-                {canAccommodate && (
+                {false && canAccommodate && (
                   <div className="mt-4">
                     <Button
                       variant={isSelected ? "success" : "outline"}
@@ -339,3 +344,5 @@ export default function VehicleSelection(props: VehicleSelectionProps) {
     </div>
   );
 }
+
+

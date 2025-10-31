@@ -27,7 +27,26 @@ export class ParameterManagementServiceImpl implements ParameterManagementServic
 
   constructor() {
     this.parameters = this.getDefaultParameters();
-    this.initializeParameters();
+    if (typeof window !== 'undefined') {
+      this.initializeParametersSync();
+    }
+  }
+
+  private initializeParametersSync(): void {
+    try {
+      const storedParams = this.safeGet(this.STORAGE_KEYS.PARAMETERS);
+      const storedHistory = this.safeGet(this.STORAGE_KEYS.CHANGE_HISTORY);
+      if (storedParams) {
+        this.parameters = { ...this.getDefaultParameters(), ...JSON.parse(storedParams) };
+      }
+      if (storedHistory) {
+        this.changeHistory = JSON.parse(storedHistory) || [];
+      }
+      this.initialized = true;
+    } catch {
+      this.parameters = this.getDefaultParameters();
+      this.initialized = true;
+    }
   }
 
   /**
@@ -52,16 +71,19 @@ export class ParameterManagementServiceImpl implements ParameterManagementServic
     if (this.initialized) return;
 
     try {
-      // Load from localStorage first
-      const storedParams = this.loadParametersFromStorage();
-      const storedHistory = this.loadChangeHistoryFromStorage();
+      // Load from localStorage first (client only)
+      const storedParams = typeof window !== 'undefined' ? this.loadParametersFromStorage() : null;
+      const storedHistory = typeof window !== 'undefined' ? this.loadChangeHistoryFromStorage() : null;
 
       if (storedParams) {
         this.parameters = { ...this.getDefaultParameters(), ...storedParams };
         this.changeHistory = storedHistory || [];
-      } else {
+      } else if (typeof window !== 'undefined') {
         // Load from data files if no stored parameters
         await this.loadParametersFromDataFiles();
+      } else {
+        // SSR fallback
+        this.parameters = this.getDefaultParameters();
       }
 
       this.initialized = true;
@@ -69,6 +91,15 @@ export class ParameterManagementServiceImpl implements ParameterManagementServic
       console.error('Failed to initialize parameters:', error);
       this.parameters = this.getDefaultParameters();
       this.initialized = true;
+    }
+  }
+
+  private safeGet(key: string): string | null {
+    try {
+      if (typeof window === 'undefined') return null;
+      return window.localStorage.getItem(key);
+    } catch {
+      return null;
     }
   }
 
@@ -132,7 +163,7 @@ export class ParameterManagementServiceImpl implements ParameterManagementServic
    */
   private loadParametersFromStorage(): SystemParameters | null {
     try {
-      const stored = localStorage.getItem(this.STORAGE_KEYS.PARAMETERS);
+      const stored = this.safeGet(this.STORAGE_KEYS.PARAMETERS);
       return stored ? JSON.parse(stored) : null;
     } catch (error) {
       console.error('Error loading parameters from storage:', error);
@@ -145,7 +176,7 @@ export class ParameterManagementServiceImpl implements ParameterManagementServic
    */
   private loadChangeHistoryFromStorage(): ParameterChangeHistory[] | null {
     try {
-      const stored = localStorage.getItem(this.STORAGE_KEYS.CHANGE_HISTORY);
+      const stored = this.safeGet(this.STORAGE_KEYS.CHANGE_HISTORY);
       return stored ? JSON.parse(stored) : null;
     } catch (error) {
       console.error('Error loading change history from storage:', error);
@@ -158,7 +189,11 @@ export class ParameterManagementServiceImpl implements ParameterManagementServic
    */
   private saveParametersToStorage(): void {
     try {
-      localStorage.setItem(this.STORAGE_KEYS.PARAMETERS, JSON.stringify(this.parameters));
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(this.STORAGE_KEYS.PARAMETERS, JSON.stringify(this.parameters));
+        window.dispatchEvent(new Event('storage')); // notify same-tab listeners
+        window.dispatchEvent(new CustomEvent('parameters:updated'));
+      }
     } catch (error) {
       console.error('Error saving parameters to storage:', error);
     }
@@ -169,7 +204,9 @@ export class ParameterManagementServiceImpl implements ParameterManagementServic
    */
   private saveChangeHistoryToStorage(): void {
     try {
-      localStorage.setItem(this.STORAGE_KEYS.CHANGE_HISTORY, JSON.stringify(this.changeHistory));
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(this.STORAGE_KEYS.CHANGE_HISTORY, JSON.stringify(this.changeHistory));
+      }
     } catch (error) {
       console.error('Error saving change history to storage:', error);
     }
@@ -189,8 +226,10 @@ export class ParameterManagementServiceImpl implements ParameterManagementServic
    */
   getParameters(): SystemParameters {
     if (!this.initialized) {
-      this.initializeParameters();
-      return this.getDefaultParameters();
+      if (typeof window !== 'undefined') {
+        this.initializeParametersSync();
+      }
+      return { ...this.parameters };
     }
     return { ...this.parameters };
   }

@@ -96,17 +96,17 @@ export default function PricingDisplay({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-gray-900 dark:text-gray-100">
       {/* Route Summary */}
       <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
         <h3 className="font-semibold mb-2">Resumen del Itinerario</h3>
         <div className="text-sm space-y-1">
-          <p><strong>Base:</strong> {itinerary.base.lugar}</p>
-          <p><strong>Origen:</strong> {itinerary.origen.lugar}</p>
-          <p><strong>Destino:</strong> {itinerary.destino.lugar}</p>
-          <p><strong>Días:</strong> {itinerary.dias}</p>
-          <p><strong>Total Kms:</strong> {formatUnits(itinerary.kms.total, 'Kms')}</p>
-          <p><strong>Tipo:</strong> {itinerary.nacional ? 'Nacional' : 'Internacional'}</p>
+          <div className="flex justify-between"><span className="text-gray-700 dark:text-gray-300">Base</span><span className="text-right">{itinerary.base.lugar}</span></div>
+          <div className="flex justify-between"><span className="text-gray-700 dark:text-gray-300">Origen</span><span className="text-right">{itinerary.origen.lugar}</span></div>
+          <div className="flex justify-between"><span className="text-gray-700 dark:text-gray-300">Destino</span><span className="text-right">{itinerary.destino.lugar}</span></div>
+          <div className="flex justify-between"><span className="text-gray-700 dark:text-gray-300">Días</span><span className="text-right">{itinerary.dias}</span></div>
+          <div className="flex justify-between"><span className="text-gray-700 dark:text-gray-300">Total Kms</span><span className="text-right">{formatUnits(itinerary.kms.total, 'Kms')}</span></div>
+          <div className="flex justify-between"><span className="text-gray-700 dark:text-gray-300">Tipo</span><span className="text-right">{itinerary.nacional ? 'Nacional' : 'Internacional'}</span></div>
         </div>
       </div>
 

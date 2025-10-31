@@ -32,18 +32,19 @@ export default function MapComponent({
 
   // Initialize map
   useEffect(() => {
-    if (isLoaded && mapRef.current && !map) {
-      const newMap = new google.maps.Map(mapRef.current, {
+    const g: any = (globalThis as any).google;
+    if (isLoaded && g && mapRef.current && !map) {
+      const newMap = new g.maps.Map(mapRef.current, {
         center: { lat: 15.49, lng: -88.03 }, // San Pedro Sula
         zoom: 10,
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        mapTypeId: g.maps.MapTypeId.ROADMAP,
         mapTypeControl: true,
         streetViewControl: true,
         fullscreenControl: true,
         zoomControl: true,
       });
 
-      const renderer = new google.maps.DirectionsRenderer({
+      const renderer = new g.maps.DirectionsRenderer({
         map: newMap,
         draggable: false,
         polylineOptions: {
@@ -60,7 +61,7 @@ export default function MapComponent({
       setDirectionsRenderer(renderer);
 
       // Trigger resize event
-      google.maps.event.trigger(newMap, 'resize');
+      g.maps.event.trigger(newMap, 'resize');
     }
   }, [isLoaded, map]);
 
@@ -72,7 +73,9 @@ export default function MapComponent({
     const newMarkers: typeof markers = {};
 
     // Create geocoder for location coordinates
-    const geocoder = new google.maps.Geocoder();
+    const g: any = (globalThis as any).google;
+    if (!g) return;
+    const geocoder = new g.maps.Geocoder();
 
     // Create simple markers using the legacy Marker for now (will be updated in future)
     // Base location marker (green)
@@ -80,12 +83,12 @@ export default function MapComponent({
       geocoder.geocode({ address: itinerary.base.lugar }, (results, status) => {
         if (status === 'OK' && results?.[0]) {
           // Using legacy Marker temporarily to avoid deprecation warnings
-          const marker = new (google.maps as any).Marker({
+          const marker = new (g.maps as any).Marker({
             position: results[0].geometry.location,
             map,
             title: `Base: ${itinerary.base.lugar}`,
             icon: {
-              path: google.maps.SymbolPath.CIRCLE,
+              path: g.maps.SymbolPath.CIRCLE,
               scale: 10,
               fillColor: '#10b981',
               fillOpacity: 1,
@@ -94,7 +97,7 @@ export default function MapComponent({
             },
           });
 
-          const infoWindow = new google.maps.InfoWindow({
+          const infoWindow = new g.maps.InfoWindow({
             content: `<div class="p-2"><strong>Base Location</strong><br/>${itinerary.base.lugar}</div>`,
           });
 
@@ -111,12 +114,12 @@ export default function MapComponent({
     if (itinerary.origen.lugar) {
       geocoder.geocode({ address: itinerary.origen.lugar }, (results, status) => {
         if (status === 'OK' && results?.[0]) {
-          const marker = new (google.maps as any).Marker({
+          const marker = new (g.maps as any).Marker({
             position: results[0].geometry.location,
             map,
             title: `Origin: ${itinerary.origen.lugar}`,
             icon: {
-              path: google.maps.SymbolPath.CIRCLE,
+              path: g.maps.SymbolPath.CIRCLE,
               scale: 10,
               fillColor: '#2563eb',
               fillOpacity: 1,
@@ -125,7 +128,7 @@ export default function MapComponent({
             },
           });
 
-          const infoWindow = new google.maps.InfoWindow({
+          const infoWindow = new g.maps.InfoWindow({
             content: `<div class="p-2"><strong>Origin</strong><br/>${itinerary.origen.lugar}</div>`,
           });
 
@@ -269,9 +272,11 @@ export default function MapComponent({
         `;
 
         // Create info window
-        const infoWindow = new google.maps.InfoWindow({
+        const g: any = (globalThis as any).google;
+        if (!g) return;
+        const infoWindow = new g.maps.InfoWindow({
           content: infoContent,
-          position: route.overview_path[Math.floor(route.overview_path.length / 2)],
+          position: (route.overview_path && route.overview_path[Math.floor(route.overview_path.length / 2)]) || undefined,
         });
 
         infoWindow.open(map);
@@ -351,38 +356,22 @@ export default function MapComponent({
 
         <div
           ref={mapRef}
-          className="w-full h-96 bg-base-300 rounded-lg overflow-hidden"
+          className="w-full h-96 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden"
         />
 
         {itinerary.kms.total > 0 && (
-          <div className="stats shadow w-full">
-            <div className="stat">
-              <div className="stat-title">Distancia Total</div>
-              <div className="stat-value text-primary">{itinerary.kms.total}</div>
-              <div className="stat-desc">Kilómetros</div>
+          <div className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
+            <h4 className="font-semibold mb-3 text-gray-900 dark:text-gray-100">Resumen de Ruta</h4>
+            <div className="text-sm space-y-1 text-gray-900 dark:text-gray-100">
+              <div className="flex justify-between"><span className="text-gray-700 dark:text-gray-300">Distancia Total</span><span className="font-medium">{itinerary.kms.total} Kms</span></div>
+              {itinerary.base.lugar !== itinerary.origen.lugar && (
+                <div className="flex justify-between"><span className="text-gray-700 dark:text-gray-300">Base → Origen</span><span className="font-medium">{itinerary.base.origen.distancia} Kms</span></div>
+              )}
+              <div className="flex justify-between"><span className="text-gray-700 dark:text-gray-300">Origen → Destino</span><span className="font-medium">{itinerary.origen.destino.distancia} Kms</span></div>
+              {itinerary.kms.extra > 0 && (
+                <div className="flex justify-between"><span className="text-gray-700 dark:text-gray-300">Kms Extra</span><span className="font-medium">{itinerary.kms.extra} Kms</span></div>
+              )}
             </div>
-
-            {itinerary.base.lugar !== itinerary.origen.lugar && (
-              <div className="stat">
-                <div className="stat-title">Base → Origen</div>
-                <div className="stat-value text-sm">{itinerary.base.origen.distancia}</div>
-                <div className="stat-desc">Kms</div>
-              </div>
-            )}
-
-            <div className="stat">
-              <div className="stat-title">Origen → Destino</div>
-              <div className="stat-value text-sm">{itinerary.origen.destino.distancia}</div>
-              <div className="stat-desc">Kms</div>
-            </div>
-
-            {itinerary.kms.extra > 0 && (
-              <div className="stat">
-                <div className="stat-title">Kms Extra</div>
-                <div className="stat-value text-sm">{itinerary.kms.extra}</div>
-                <div className="stat-desc">Kms</div>
-              </div>
-            )}
           </div>
         )}
       </div>

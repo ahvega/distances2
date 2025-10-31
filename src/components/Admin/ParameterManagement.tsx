@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Input, Button, Panel } from '@/components/ui';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -132,18 +133,20 @@ export default function ParameterManagement({ onParametersUpdated }: ParameterMa
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="loading loading-spinner loading-lg"></div>
-        <span className="ml-4">Loading parameters...</span>
+      <div className="flex items-center justify-center p-8 text-gray-900 dark:text-gray-100">
+        <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin mr-3" />
+        <span>Loading parameters...</span>
       </div>
     );
   }
 
   if (!parameters) {
     return (
-      <div className="alert alert-error">
-        <i className="fas fa-exclamation-triangle"></i>
-        <span>Failed to load parameters. Please refresh the page.</span>
+      <div className="p-4 rounded-lg border-l-4 border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300">
+        <div className="flex items-center gap-2">
+          <i className="fas fa-exclamation-triangle" />
+          <span>Failed to load parameters. Please refresh the page.</span>
+        </div>
       </div>
     );
   }
@@ -162,7 +165,7 @@ export default function ParameterManagement({ onParametersUpdated }: ParameterMa
           <button
             type="button"
             onClick={() => setShowHistory(!showHistory)}
-            className="btn btn-outline btn-sm"
+            className="btn btn-outline btn-sm inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             <i className="fas fa-history"></i>
             {showHistory ? 'Hide History' : 'Show History'}
@@ -170,7 +173,7 @@ export default function ParameterManagement({ onParametersUpdated }: ParameterMa
           <button
             type="button"
             onClick={handleResetToDefaults}
-            className="btn btn-outline btn-error btn-sm"
+            className="btn btn-outline btn-error btn-sm inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-red-300 dark:border-red-600 text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
             disabled={saving}
           >
             <i className="fas fa-undo"></i>
@@ -180,18 +183,12 @@ export default function ParameterManagement({ onParametersUpdated }: ParameterMa
       </div>
 
       {/* Parameter Update Form */}
-      <div className="card bg-base-100 shadow-xl">
-        <div className="card-body">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <Panel className="os-window">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 p-4">
             {/* Cost Parameters */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <FormField label="Fuel Price (HNL per gallon)" icon="fa-gas-pump">
-                <input
-                  type="number"
-                  step="0.01"
-                  className={`input input-bordered w-full ${errors.fuelPrice ? 'input-error' : ''}`}
-                  {...register('fuelPrice', { valueAsNumber: true })}
-                />
+                <Input type="number" step="0.01" fullWidth {...register('fuelPrice', { valueAsNumber: true })} />
                 {errors.fuelPrice && (
                   <div className="label">
                     <span className="label-text-alt text-error">{errors.fuelPrice.message}</span>
@@ -200,12 +197,7 @@ export default function ParameterManagement({ onParametersUpdated }: ParameterMa
               </FormField>
 
               <FormField label="Meal Cost per Day (HNL)" icon="fa-utensils">
-                <input
-                  type="number"
-                  step="0.01"
-                  className={`input input-bordered w-full ${errors.mealCostPerDay ? 'input-error' : ''}`}
-                  {...register('mealCostPerDay', { valueAsNumber: true })}
-                />
+                <Input type="number" step="0.01" fullWidth {...register('mealCostPerDay', { valueAsNumber: true })} />
                 {errors.mealCostPerDay && (
                   <div className="label">
                     <span className="label-text-alt text-error">{errors.mealCostPerDay.message}</span>
@@ -217,12 +209,7 @@ export default function ParameterManagement({ onParametersUpdated }: ParameterMa
               </FormField>
 
               <FormField label="Hotel Cost per Night (HNL)" icon="fa-bed">
-                <input
-                  type="number"
-                  step="0.01"
-                  className={`input input-bordered w-full ${errors.hotelCostPerNight ? 'input-error' : ''}`}
-                  {...register('hotelCostPerNight', { valueAsNumber: true })}
-                />
+                <Input type="number" step="0.01" fullWidth {...register('hotelCostPerNight', { valueAsNumber: true })} />
                 {errors.hotelCostPerNight && (
                   <div className="label">
                     <span className="label-text-alt text-error">{errors.hotelCostPerNight.message}</span>
@@ -237,22 +224,10 @@ export default function ParameterManagement({ onParametersUpdated }: ParameterMa
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField label="Exchange Rate (HNL per USD)" icon="fa-exchange-alt">
                 <div className="flex gap-2">
-                  <input
-                    type="number"
-                    step="0.01"
-                    className={`input input-bordered flex-1 ${errors.exchangeRate ? 'input-error' : ''}`}
-                    {...register('exchangeRate', { valueAsNumber: true })}
-                    disabled={!useCustomExchangeRate}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleFetchExchangeRate}
-                    className="btn btn-outline btn-sm"
-                    disabled={saving}
-                    title="Fetch current exchange rate"
-                  >
-                    <i className="fas fa-sync-alt"></i>
-                  </button>
+                  <Input type="number" step="0.01" className="flex-1" fullWidth {...register('exchangeRate', { valueAsNumber: true })} disabled={!useCustomExchangeRate} />
+                  <Button type="button" onClick={handleFetchExchangeRate} className="inline-flex items-center justify-center px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700" disabled={saving}>
+                    <i className="fas fa-sync-alt" />
+                  </Button>
                 </div>
                 {errors.exchangeRate && (
                   <div className="label">
@@ -262,16 +237,10 @@ export default function ParameterManagement({ onParametersUpdated }: ParameterMa
               </FormField>
 
               <FormField label="Exchange Rate Options" icon="fa-cog">
-                <div className="form-control">
-                  <label className="label cursor-pointer">
-                    <span className="label-text">Use custom exchange rate</span>
-                    <input
-                      type="checkbox"
-                      className="checkbox"
-                      {...register('useCustomExchangeRate')}
-                    />
-                  </label>
-                </div>
+                <label className="inline-flex items-center gap-2">
+                  <span className="text-sm">Use custom exchange rate</span>
+                  <input type="checkbox" className="h-5 w-5 rounded border-gray-300 dark:border-gray-600 text-blue-600" {...register('useCustomExchangeRate')} />
+                </label>
                 <div className="label">
                   <span className="label-text-alt">
                     {useCustomExchangeRate
@@ -288,20 +257,14 @@ export default function ParameterManagement({ onParametersUpdated }: ParameterMa
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField label="Preferred Distance Unit" icon="fa-ruler">
-                <select
-                  className="select select-bordered w-full"
-                  {...register('preferredDistanceUnit')}
-                >
+                <select className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" {...register('preferredDistanceUnit')}>
                   <option value="km">Kilometers (km)</option>
                   <option value="mile">Miles</option>
                 </select>
               </FormField>
 
               <FormField label="Preferred Currency" icon="fa-money-bill">
-                <select
-                  className="select select-bordered w-full"
-                  {...register('preferredCurrency')}
-                >
+                <select className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" {...register('preferredCurrency')}>
                   <option value="HNL">Honduran Lempira (HNL)</option>
                   <option value="USD">US Dollar (USD)</option>
                 </select>
@@ -310,47 +273,22 @@ export default function ParameterManagement({ onParametersUpdated }: ParameterMa
 
             {/* Update Reason */}
             <FormField label="Update Reason (Optional)" icon="fa-comment">
-              <textarea
-                className="textarea textarea-bordered w-full"
-                placeholder="Describe the reason for this parameter update..."
-                value={updateReason}
-                onChange={(e) => setUpdateReason(e.target.value)}
-                rows={2}
-              />
+              <textarea className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm" placeholder="Describe the reason for this parameter update..." value={updateReason} onChange={(e) => setUpdateReason(e.target.value)} rows={2} />
             </FormField>
 
             {/* Submit Button */}
             <div className="flex justify-end gap-4">
-              <button
-                type="button"
-                onClick={() => reset(parameters)}
-                className="btn btn-outline"
-                disabled={!isDirty || saving}
-              >
-                <i className="fas fa-undo"></i>
+              <Button type="button" onClick={() => reset(parameters)} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700" disabled={!isDirty || saving}>
+                <i className="fas fa-undo" />
                 Reset Changes
-              </button>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={!isDirty || saving}
-              >
-                {saving ? (
-                  <>
-                    <span className="loading loading-spinner loading-sm"></span>
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <i className="fas fa-save"></i>
-                    Save Parameters
-                  </>
-                )}
-              </button>
+              </Button>
+              <Button type="submit" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white" disabled={!isDirty || saving}>
+                <i className="fas fa-save" />
+                Save Parameters
+              </Button>
             </div>
-          </form>
-        </div>
-      </div>
+        </form>
+      </Panel>
 
       {/* Parameter History */}
       {showHistory && (
