@@ -12,148 +12,280 @@ The application follows a modular architecture with clear separation of concerns
 
 ```mermaid
 graph TB
-    UI[React UI Components] --> Hooks[Custom React Hooks]
-    Hooks --> Services[Service Layer]
+    App[Next.js App Router] --> Layout[Layout Components]
+    Layout --> Pages[Page Components]
+    Pages --> UI[UI Components]
+    UI --> Hooks[Custom Hooks]
+    Hooks --> Context[React Context]
+    Context --> Services[Service Layer]
+    Services --> Utils[Utility Functions]
     Services --> APIs[External APIs]
-    Services --> Storage[Local Storage/State]
+    Utils --> Storage[Local Storage]
+
+    subgraph "App Structure (src/app/)"
+        MainPage[page.tsx - Main Application]
+        AdminPage[admin/page.tsx - Parameter Management]
+        RootLayout[layout.tsx - Root Layout with Providers]
+        GlobalCSS[globals.css - Tailwind + Custom Styles]
+    end
+
+    subgraph "Context Layer (src/context/)"
+        AppContext[AppContext - Global State Management]
+        ThemeContext[ThemeContext - Theme Management]
+    end
+
+    subgraph "Component Architecture (src/components/)"
+        LayoutComps[Layout/ - DesktopLayout, MobileLayout]
+        FormComps[Forms/ - DataForm, VehicleSelection, LocationInput]
+        UIComps[ui/ - Button, Input, Card, Modal, etc.]
+        AdminComps[Admin/ - Parameter Management UI]
+        MapComps[Map/ - MapComponent with Google Maps]
+        PricingComps[Pricing/ - ModernPricingTable]
+        CostComps[Costs/ - ModernCostBreakdown]
+    end
+
+    subgraph "Business Logic (src/services/)"
+        RouteService[RouteCalculatorService]
+        CostService[CostCalculationService]
+        VehicleService[VehicleManagementService]
+        ParameterService[ParameterManagementService]
+        ExchangeService[ExchangeRateService]
+    end
 
     subgraph "External APIs"
-        GoogleMaps[Google Maps API]
+        GoogleMaps[Google Maps JavaScript API]
+        GooglePlaces[Google Places API]
         GoogleDistance[Google Distance Matrix API]
-        ExchangeRate[Exchange Rate API]
     end
 
-    subgraph "Core Services"
-        RouteService[Route Calculator Service]
-        CostService[Cost Calculation Service]
-        VehicleService[Vehicle Management Service]
-        ParameterService[Parameter Management Service]
-    end
-
-    subgraph "UI Layer"
-        QuotationForm[Quotation Form]
-        ResultsDisplay[Results Display]
-        MapComponent[Interactive Map]
-        AdminPanel[Parameter Management]
+    subgraph "Utilities (src/utils/)"
+        Validation[validation.ts - Zod schemas]
+        Formatting[formatting.ts - Currency, numbers]
+        Storage[storage.ts - localStorage wrapper]
+        Cache[cache.ts - API response caching]
+        UnitConversion[unitConversion.ts - Distance/fuel units]
     end
 ```
 
 ### Technology Stack
 
-- **Frontend Framework**: Next.js 14 with App Router
-- **UI Library**: React 18 with TypeScript
-- **Styling**: Tailwind CSS
-- **State Management**: React Context + useReducer
-- **Maps Integration**: Google Maps JavaScript API
-- **HTTP Client**: Fetch API with custom service wrappers
-- **Data Persistence**: localStorage for parameters and vehicle data
-- **Form Handling**: React Hook Form with Zod validation
+- **Frontend Framework**: Next.js 15.5.6 with App Router
+- **UI Library**: React 19.1.0 with TypeScript 5.x
+- **Styling**: Tailwind CSS v4 with DaisyUI v5.3.7 and custom theme configuration
+- **UI Components**:
+  - Headless UI v2.2.9 for accessible components
+  - Radix UI components (@radix-ui/react-dialog, @radix-ui/react-popover)
+  - Custom UI component library in `src/components/ui/`
+- **State Management**: React Context API with useReducer pattern
+- **Maps Integration**: Google Maps JavaScript API with TypeScript definitions
+- **HTTP Client**: Native Fetch API with custom service layer wrappers
+- **Data Persistence**: localStorage with custom storage utilities
+- **Form Handling**: React Hook Form v7.65.0 with Zod v4.1.12 validation
+- **Design System**: Dark-first theme with glassmorphism effects and gradient accents
+- **Build Tools**:
+  - PostCSS with @tailwindcss/postcss v4
+  - ESLint v8.57.0 with Next.js configuration
+  - Autoprefixer for CSS vendor prefixes
 
 ## Components and Interfaces
 
-### Core Components
+### Actual Component Structure
 
-#### 1. QuotationForm Component
+#### 1. Layout Components (`src/components/Layout/`)
 ```typescript
-interface QuotationFormProps {
-  onSubmit: (data: QuotationRequest) => void;
-  loading: boolean;
+// DesktopLayout.tsx - Main desktop interface with glassmorphism design
+export default function DesktopLayout(): JSX.Element
+
+// MobileLayout.tsx - Mobile-optimized interface
+export default function MobileLayout(): JSX.Element
+
+// MobileNavigation.tsx - Mobile navigation component
+interface MobileNavigationProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+```
+
+#### 2. Form Components (`src/components/Forms/`)
+```typescript
+// DataForm.tsx - Main quotation form with modern dark styling
+interface DataFormProps extends Partial<QuotationFormProps> {
+  onSubmit?: (data: QuotationFormData) => void;
 }
 
-interface QuotationRequest {
-  origin: string;
-  destination: string;
-  baseLocation: string;
+// VehicleSelection.tsx - Vehicle selection with capacity filtering
+interface VehicleSelectionProps {
+  vehicles: any[];
   groupSize: number;
-  extraMileage?: number;
+  onVehicleSelect: (vehicles: Vehicle[] | Vehicle | null) => void;
+  selectedVehicle?: Vehicle | Vehicle[];
+}
+
+// LocationInput.tsx - Google Places autocomplete input
+interface LocationInputProps {
+  value: string;
+  onChange: (value: string) => void;
+  onPlaceSelect?: (place: PlaceResult) => void;
+  placeholder?: string;
+  enableAutocomplete?: boolean;
+}
+
+// RangeSlider.tsx - Custom range slider component
+interface RangeSliderProps {
+  min: number;
+  max: number;
+  step: number;
+  value: number;
+  onChange: (value: number) => void;
+  unit?: string;
 }
 ```
 
-#### 2. RouteMap Component
+#### 3. UI Component Library (`src/components/ui/`)
 ```typescript
-interface RouteMapProps {
-  origin: google.maps.LatLng;
-  destination: google.maps.LatLng;
-  baseLocation: google.maps.LatLng;
-  route?: google.maps.DirectionsResult;
+// Button.tsx - Modern button with variants and loading states
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  loading?: boolean;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+}
+
+// Input.tsx - Enhanced input with validation states
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
+  helperText?: string;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+}
+
+// Card.tsx - Glassmorphism card component
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  variant?: 'default' | 'outlined' | 'elevated';
+  padding?: 'none' | 'sm' | 'md' | 'lg';
+  hover?: boolean;
 }
 ```
 
-#### 3. CostBreakdown Component
+#### 4. Business Components
 ```typescript
-interface CostBreakdownProps {
+// ModernPricingTable.tsx - Pricing display with markup options
+interface ModernPricingTableProps {
+  baseCost: number;
+  exchangeRate: number;
+  currency?: 'USD' | 'HNL';
+}
+
+// ModernCostBreakdown.tsx - Detailed cost analysis display
+interface ModernCostBreakdownProps {
   costs: DetailedCosts;
   vehicle: Vehicle;
-  currency: 'USD' | 'HNL';
+  currency?: 'USD' | 'HNL';
+}
+
+// MapComponent.tsx - Google Maps integration
+interface MapComponentProps {
+  className?: string;
 }
 ```
 
-#### 4. PricingTable Component
+#### 5. Admin Components (`src/components/Admin/`)
 ```typescript
-interface PricingTableProps {
-  baseCost: number;
-  markupOptions: number[];
-  recommendedMarkup: number;
-  exchangeRate: number;
-}
+// ParameterManagement.tsx - System parameter management
+// ParameterCard.tsx - Individual parameter editing
+// ParameterHistory.tsx - Parameter change history
+// QuickParameterUpdate.tsx - Quick parameter updates
 ```
 
-#### 5. VehicleSelector Component
+### Actual Service Layer (`src/services/`)
+
+#### 1. RouteCalculatorService.ts
 ```typescript
-interface VehicleSelectorProps {
-  vehicles: Vehicle[];
-  groupSize: number;
-  onVehicleSelect: (vehicle: Vehicle) => void;
-  selectedVehicle?: Vehicle;
+class RouteCalculatorService {
+  private directionsService: google.maps.DirectionsService;
+  private distanceMatrixService: google.maps.DistanceMatrixService;
+
+  calculateRoute(origin: string, destination: string, waypoints?: string[]): Promise<RouteResult>;
+  calculateDistanceMatrix(origins: string[], destinations: string[]): Promise<DistanceMatrixResult>;
+  private handleDirectionsResult(result: google.maps.DirectionsResult): RouteResult;
 }
+
+export const routeCalculatorService = new RouteCalculatorService();
 ```
 
-### Service Interfaces
-
-#### 1. Route Calculator Service
+#### 2. CostCalculationService.ts
 ```typescript
-interface RouteCalculatorService {
-  calculateRoute(origin: string, destination: string, baseLocation: string): Promise<RouteResult>;
-  getDistanceMatrix(origins: string[], destinations: string[]): Promise<DistanceMatrixResult>;
+// Multiple calculator classes for different cost components
+class FuelCalculator {
+  calculateFuelCosts(distance: number, vehicle: Vehicle, fuelPrice: number): FuelCosts;
+  calculateRefuelingCosts(distance: number, vehicle: Vehicle): RefuelingCosts;
 }
 
-interface RouteResult {
-  totalDistance: number;
-  totalTime: number;
-  route: google.maps.DirectionsResult;
-  segments: RouteSegment[];
+class DriverExpenseCalculator {
+  calculateDriverExpenses(days: number, mealCost: number, hotelCost: number): DriverExpenses;
 }
+
+class VehicleCostCalculator {
+  calculateVehicleCosts(distance: number, days: number, vehicle: Vehicle): VehicleCosts;
+}
+
+class CostCalculationService {
+  calculateTotalCosts(request: CostCalculationRequest): DetailedCosts;
+}
+
+export const costCalculationService = new CostCalculationService();
+export const fuelCalculator = new FuelCalculator();
+export const driverExpenseCalculator = new DriverExpenseCalculator();
+export const vehicleCostCalculator = new VehicleCostCalculator();
 ```
 
-#### 2. Cost Calculation Service
+#### 3. VehicleManagementService.ts
 ```typescript
-interface CostCalculationService {
-  calculateTotalCosts(request: CostCalculationRequest): Promise<DetailedCosts>;
-  calculateFuelCosts(distance: number, vehicle: Vehicle): FuelCosts;
-  calculateDriverExpenses(duration: number): DriverExpenses;
-  calculateVehicleCosts(distance: number, duration: number, vehicle: Vehicle): VehicleCosts;
-}
-```
+class VehicleManagementService {
+  private vehicles: Map<string, Vehicle> = new Map();
 
-#### 3. Vehicle Management Service
-```typescript
-interface VehicleManagementService {
+  loadVehicles(): Promise<void>;
   getVehicles(): Vehicle[];
   getVehiclesByCapacity(minCapacity: number): Vehicle[];
+  getVehicleById(id: string): Vehicle | undefined;
   addVehicle(vehicle: Vehicle): void;
-  updateVehicle(id: string, vehicle: Partial<Vehicle>): void;
-  deleteVehicle(id: string): void;
+  updateVehicle(id: string, updates: Partial<Vehicle>): void;
 }
+
+export const vehicleManagementService = new VehicleManagementService();
 ```
 
-#### 4. Parameter Management Service
+#### 4. ParameterManagementService.ts
 ```typescript
-interface ParameterManagementService {
-  getParameters(): SystemParameters;
-  updateParameter(key: string, value: number): void;
-  getExchangeRate(): Promise<number>;
-  setCustomExchangeRate(rate: number): void;
+class ParameterManagementService {
+  private parameters: Map<string, Parameter> = new Map();
+  private changeHistory: ParameterChange[] = [];
+
+  loadParameters(): Promise<void>;
+  getParameter(key: string): Parameter | undefined;
+  updateParameter(key: string, value: number, source: string): void;
+  getChangeHistory(): ParameterChange[];
+  saveParametersToStorage(): void;
 }
+
+export const parameterManagementService = new ParameterManagementService();
+```
+
+#### 5. ExchangeRateService.ts
+```typescript
+class ExchangeRateService {
+  private currentRates: ExchangeRates | null = null;
+  private customRate: number | null = null;
+
+  loadExchangeRates(): Promise<ExchangeRates>;
+  getCurrentRate(): number;
+  setCustomRate(rate: number): void;
+  convertCurrency(amount: number, fromCurrency: string, toCurrency: string): number;
+}
+
+export const exchangeRateService = new ExchangeRateService();
 ```
 
 ## Data Models
@@ -318,17 +450,154 @@ interface AppError {
 - **Parameter Security**: Validate parameter updates and maintain audit logs
 - **Session Management**: Implement secure session handling for admin features
 
+## Modern UI Design System
+
+### Design Principles
+- **Dark-First Approach**: Default dark theme with modern aesthetics
+- **Glassmorphism**: Backdrop blur effects and translucent surfaces
+- **Gradient Accents**: Strategic use of gradients for visual hierarchy
+- **Consistent Spacing**: 8px grid system with proper visual rhythm
+- **Accessible Contrast**: WCAG AA compliant color combinations
+
+### Actual Theme Configuration (tailwind.config.js)
+```javascript
+const config = {
+  content: [
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  darkMode: 'class',
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['IBM Plex Sans', 'ui-sans-serif', 'system-ui'],
+        mono: ['IBM Plex Mono', 'ui-monospace', 'monospace'],
+      },
+      colors: {
+        plannertours: {
+          blue: '#3b82f6',
+          cyan: '#06b6d4',
+          dark: '#1e40af',
+          accent: '#8b5cf6',
+        },
+        primary: {
+          50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe',
+          300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6',
+          600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af',
+          900: '#1e3a8a', 950: '#172554',
+        },
+        gray: {
+          50: '#f9fafb', 100: '#f3f4f6', 200: '#e5e7eb',
+          300: '#d1d5db', 400: '#9ca3af', 500: '#6b7280',
+          600: '#4b5563', 700: '#374151', 800: '#1f2937',
+          900: '#111827', 950: '#030712',
+        },
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.5s ease-in-out',
+        'slide-up': 'slideUp 0.3s ease-out',
+        'slide-down': 'slideDown 0.3s ease-out',
+        'scale-in': 'scaleIn 0.2s ease-out',
+      },
+    },
+  },
+  plugins: [require('daisyui')],
+  daisyui: {
+    themes: [
+      {
+        corporate: {
+          "primary": "#3b82f6", "secondary": "#06b6d4", "accent": "#8b5cf6",
+          "neutral": "#374151", "base-100": "#ffffff", "base-200": "#f3f4f6",
+          "base-300": "#e5e7eb", "info": "#06b6d4", "success": "#10b981",
+          "warning": "#f59e0b", "error": "#ef4444",
+        },
+        business: {
+          "primary": "#3b82f6", "secondary": "#06b6d4", "accent": "#8b5cf6",
+          "neutral": "#1f2937", "base-100": "#1f2937", "base-200": "#111827",
+          "base-300": "#0f172a", "info": "#06b6d4", "success": "#10b981",
+          "warning": "#f59e0b", "error": "#ef4444",
+        }
+      }
+    ],
+    darkTheme: "business", // Default to dark theme
+    base: true, styled: true, utils: true,
+  },
+}
+```
+
+### Component Design Patterns
+- **Card Components**: Glassmorphism with `bg-slate-800/50 backdrop-blur-xl`
+- **Form Inputs**: Dark backgrounds with subtle borders and focus states
+- **Buttons**: Gradient backgrounds with hover animations
+- **Status Indicators**: Color-coded badges with proper semantic meaning
+- **Loading States**: Smooth animations with skeleton placeholders
+
+### Visual Hierarchy
+1. **Primary Actions**: Gradient buttons with prominent placement
+2. **Secondary Actions**: Subtle styling with clear affordances
+3. **Information Display**: Card-based layout with proper grouping
+4. **Navigation**: Clean header with glassmorphism effects
+5. **Status Feedback**: Color-coded indicators and animations
+
 ## Deployment and Infrastructure
 
 ### Development Environment
-- **Local Development**: Next.js development server with hot reloading
+- **Local Development**: Next.js 15.5.6 development server with hot reloading
 - **Environment Variables**: Secure management of API keys and configuration
-- **Development Tools**: ESLint, Prettier, TypeScript for code quality
+- **Development Tools**: ESLint v9, TypeScript v5 for code quality
+- **Package Management**: npm with exact version matching for consistency
 
 ### Production Deployment
 - **Static Generation**: Pre-generate static pages where possible
 - **CDN Integration**: Serve static assets through CDN
 - **Environment Configuration**: Separate configurations for different environments
 - **Monitoring**: Application performance and error monitoring
+- **Build Optimization**: Tailwind CSS v4 with optimized bundle sizes
 
-This design provides a solid foundation for implementing the enhanced transportation quotation system while maintaining scalability, maintainability, and user experience.
+### Current Implementation Status
+
+#### ✅ Completed Architecture Components
+- **App Structure**: Next.js 15.5.6 App Router with proper page organization
+- **State Management**: React Context with useReducer for global state (AppContext, ThemeContext)
+- **Service Layer**: Complete business logic services for all core functionality
+- **Component Library**: 50+ components organized by feature and reusability
+- **UI System**: Modern dark-first design with Tailwind CSS v4 and DaisyUI v5.3.7
+- **Form System**: React Hook Form with Zod validation and custom components
+- **Google APIs**: Maps, Places, and Distance Matrix integration
+- **Data Layer**: localStorage persistence with custom utilities
+- **Theme System**: Dark/light mode switching with glassmorphism effects
+
+#### 📁 Directory Structure (Implemented)
+```
+src/
+├── app/                    # Next.js App Router pages
+│   ├── admin/             # Parameter management interface
+│   ├── layout.tsx         # Root layout with providers
+│   ├── page.tsx           # Main application page
+│   └── globals.css        # Global styles with Tailwind
+├── components/            # React components organized by feature
+│   ├── Admin/            # Parameter management components
+│   ├── Common/           # Shared utility components
+│   ├── Costs/            # Cost display components
+│   ├── Forms/            # Form and input components
+│   ├── Layout/           # Layout and navigation components
+│   ├── Map/              # Google Maps integration
+│   ├── Pricing/          # Pricing display components
+│   ├── Quotation/        # Quotation workflow (in progress)
+│   ├── ui/               # Reusable UI component library
+│   └── Vehicle/          # Vehicle management components
+├── context/              # React Context providers
+├── hooks/                # Custom React hooks
+├── lib/                  # Core business logic libraries
+├── services/             # External API and business services
+├── types/                # TypeScript type definitions
+└── utils/                # Utility functions and helpers
+```
+
+#### 🔄 In Progress
+- **Quotation Workflow Integration**: useQuotationWorkflow hook and QuotationResults component
+- **Export Functionality**: PDF generation and print styling
+- **Advanced Features**: Quotation history, templates, and comparison tools
+
+This design provides a solid foundation for implementing the enhanced transportation quotation system while maintaining scalability, maintainability, and exceptional user experience with modern UI patterns.
