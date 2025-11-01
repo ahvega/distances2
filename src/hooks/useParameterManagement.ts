@@ -26,34 +26,6 @@ export function useParameterManagement(): UseParameterManagementReturn {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load parameters on mount
-  useEffect(() => {
-    refreshParameters();
-  }, []);
-
-  // Listen to cross-tab and same-tab parameter updates
-  useEffect(() => {
-    const onStorage = (e: any) => {
-      try {
-        // If specific key changed or generic signal
-        if (!e || !e.key || e.key.includes('transportation_system_parameters')) {
-          refreshParameters();
-        }
-      } catch {}
-    };
-    const onCustom = () => refreshParameters();
-    if (typeof window !== 'undefined') {
-      window.addEventListener('storage', onStorage);
-      window.addEventListener('parameters:updated', onCustom as EventListener);
-    }
-    return () => {
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('storage', onStorage);
-        window.removeEventListener('parameters:updated', onCustom as EventListener);
-      }
-    };
-  }, [refreshParameters]);
-
   const refreshParameters = useCallback(async () => {
     try {
       setLoading(true);
@@ -80,6 +52,34 @@ export function useParameterManagement(): UseParameterManagementReturn {
       setLoading(false);
     }
   }, [dispatch]);
+
+  // Load parameters on mount
+  useEffect(() => {
+    refreshParameters();
+  }, [refreshParameters]);
+
+  // Listen to cross-tab and same-tab parameter updates
+  useEffect(() => {
+    const onStorage = (e: any) => {
+      try {
+        // If specific key changed or generic signal
+        if (!e || !e.key || e.key.includes('transportation_system_parameters')) {
+          refreshParameters();
+        }
+      } catch {}
+    };
+    const onCustom = () => refreshParameters();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', onStorage);
+      window.addEventListener('parameters:updated', onCustom as EventListener);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('storage', onStorage);
+        window.removeEventListener('parameters:updated', onCustom as EventListener);
+      }
+    };
+  }, [refreshParameters]);
 
   const updateParameter = useCallback(async (key: string, value: number, reason?: string) => {
     try {

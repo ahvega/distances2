@@ -27,6 +27,7 @@ export default function MapComponent({
     origin?: any;
     destination?: any;
   }>({});
+  const [infoWindows, setInfoWindows] = useState<google.maps.InfoWindow[]>([]);
   const [isCalculating, setIsCalculating] = useState(false);
   const [routeError, setRouteError] = useState<string | null>(null);
 
@@ -65,6 +66,12 @@ export default function MapComponent({
     }
   }, [isLoaded, map]);
 
+  // Clean up previous info windows
+  const clearInfoWindows = () => {
+    infoWindows.forEach(infoWindow => infoWindow.close());
+    setInfoWindows([]);
+  };
+
   // Create custom markers for locations
   const createLocationMarkers = (map: google.maps.Map) => {
     // Clear existing markers
@@ -80,7 +87,7 @@ export default function MapComponent({
     // Create simple markers using the legacy Marker for now (will be updated in future)
     // Base location marker (green)
     if (itinerary.base.lugar) {
-      geocoder.geocode({ address: itinerary.base.lugar }, (results, status) => {
+      geocoder.geocode({ address: itinerary.base.lugar }, (results: any, status: any) => {
         if (status === 'OK' && results?.[0]) {
           // Using legacy Marker temporarily to avoid deprecation warnings
           const marker = new (g.maps as any).Marker({
@@ -112,7 +119,7 @@ export default function MapComponent({
 
     // Origin marker (blue)
     if (itinerary.origen.lugar) {
-      geocoder.geocode({ address: itinerary.origen.lugar }, (results, status) => {
+      geocoder.geocode({ address: itinerary.origen.lugar }, (results: any, status: any) => {
         if (status === 'OK' && results?.[0]) {
           const marker = new (g.maps as any).Marker({
             position: results[0].geometry.location,
@@ -143,7 +150,7 @@ export default function MapComponent({
 
     // Destination marker (red)
     if (itinerary.destino.lugar) {
-      geocoder.geocode({ address: itinerary.destino.lugar }, (results, status) => {
+      geocoder.geocode({ address: itinerary.destino.lugar }, (results: any, status: any) => {
         if (status === 'OK' && results?.[0]) {
           const marker = new (google.maps as any).Marker({
             position: results[0].geometry.location,
@@ -182,14 +189,28 @@ export default function MapComponent({
     }
   }, [map, itinerary.base.lugar, itinerary.origen.lugar, itinerary.destino.lugar]);
 
-  // Calculate route when locations are finalized (on blur/enter)
+  // Cleanup effect
+  useEffect(() => {
+    return () => {
+      // Clean up info windows on unmount
+      clearInfoWindows();
+      // Clean up markers
+      Object.values(markers).forEach(marker => marker?.setMap(null));
+    };
+  }, []);
+
+  // Calculate route when locations change (more responsive)
   useEffect(() => {
     if (isLoaded && map && directionsRenderer &&
-        itinerary.base.lugar && itinerary.origen.lugar && itinerary.destino.lugar &&
-        itinerary.lastLocationUpdate) {
-      handleRouteCalculation();
+        itinerary.base.lugar && itinerary.origen.lugar && itinerary.destino.lugar) {
+      // Add a small delay to avoid too many API calls while typing
+      const timeoutId = setTimeout(() => {
+        handleRouteCalculation();
+      }, 1000);
+
+      return () => clearTimeout(timeoutId);
     }
-  }, [isLoaded, map, directionsRenderer, itinerary.lastLocationUpdate]);
+  }, [isLoaded, map, directionsRenderer, itinerary.base.lugar, itinerary.origen.lugar, itinerary.destino.lugar]);
 
   const handleRouteCalculation = async () => {
     if (!calculateRoute || isCalculating) return;
@@ -206,6 +227,12 @@ export default function MapComponent({
 
     setIsCalculating(true);
     setRouteError(null);
+
+    // Clear previous info windows and route
+    clearInfoWindows();
+    if (directionsRenderer) {
+      directionsRenderer.setDirections({ routes: [] } as any);
+    }
 
     try {
       const result = await calculateRoute({
@@ -280,6 +307,9 @@ export default function MapComponent({
         });
 
         infoWindow.open(map);
+
+        // Keep track of info windows for cleanup
+        setInfoWindows(prev => [...prev, infoWindow]);
 
       } else {
         setRouteError('No se pudo calcular la ruta. Verifica que las ubicaciones sean válidas y estén en Honduras.');
