@@ -47,8 +47,8 @@ export default function DataForm({ onSubmit, loading: externalLoading }: DataFor
   // Filter vehicles based on group size
   const availableVehicles = React.useMemo(() => {
     return Object.values(vehicles).filter((vehicle: any) => {
-      // Convert legacy vehicle to new Vehicle interface for capacity check
-      const capacity = vehicle.capacidad_real || vehicle.passengerCapacity || 0;
+      // Handle both legacy and modern vehicle interfaces
+      const capacity = (vehicle as any).capacidad_real || (vehicle as Vehicle).passengerCapacity || 0;
       return capacity >= groupSize;
     });
   }, [vehicles, groupSize]);
@@ -67,11 +67,15 @@ export default function DataForm({ onSubmit, loading: externalLoading }: DataFor
   // Suggest vehicles automatically based on group size (greedy capacity fill)
   React.useEffect(() => {
     if (!groupSize || availableVehicles.length === 0) return;
-    const byCapacity = [...availableVehicles].sort((a: any, b: any) => (b.capacidad_real || b.passengerCapacity || 0) - (a.capacidad_real || a.passengerCapacity || 0));
+    const byCapacity = [...availableVehicles].sort((a: any, b: any) => {
+      const aCapacity = (a as any).capacidad_real || (a as Vehicle).passengerCapacity || 0;
+      const bCapacity = (b as any).capacidad_real || (b as Vehicle).passengerCapacity || 0;
+      return bCapacity - aCapacity;
+    });
     const result: any[] = [];
     let remaining = groupSize;
     for (const v of byCapacity) {
-      const cap = v.capacidad_real || v.passengerCapacity || 0;
+      const cap = (v as any).capacidad_real || (v as Vehicle).passengerCapacity || 0;
       if (cap <= 0) continue;
       if (remaining > 0) {
         result.push(v);
@@ -105,7 +109,9 @@ export default function DataForm({ onSubmit, loading: externalLoading }: DataFor
             [parent]: {
               ...parentState,
               [child]: value
-            }
+            },
+            // Update timestamp to trigger map recalculation
+            lastLocationUpdate: Date.now()
           }
         });
       }
