@@ -170,13 +170,11 @@
 
 - [x] 8. Complete Quotation Workflow Implementation
 
-
-
-
-  - [ ] 8.1 Create quotation workflow hook (useQuotationWorkflow)
+  - [x] 8.1 Create quotation workflow hook (useQuotationWorkflow)
 
     - Create useQuotationWorkflow hook in src/hooks/ to orchestrate the complete quotation process
     - Integrate RouteCalculatorService for route calculation from form data
+
     - Connect CostCalculationService for detailed cost analysis
     - Handle vehicle selection and capacity validation logic
     - Implement proper error handling and loading states throughout the workflow
