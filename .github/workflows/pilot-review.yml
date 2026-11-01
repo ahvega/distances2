@@ -11,12 +11,8 @@ jobs:
   approve:
     runs-on: ubuntu-latest
     steps:
-      - env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR: ${{ github.event.pull_request.number }}
-        run: >-
-          gh pr review "$PR" --repo ahvega/distances2 --approve
-          --body "Revision automatica del piloto real de ws-control
-          (ahvega/agent-skills#239). Repo desechable; aprueba por forma el
-          diff sintetico del carril.
-          modelo=ws-pilot-actions-review · familia=github-actions"
+      - run: >-
+          echo "auto-approve desactivado: github-actions[bot] no puede aprobar
+          PRs (ahvega/agent-skills#262). La aprobacion la da bertoadal
+          (segunda cuenta del owner). Job en no-op para que el check quede
+          verde y ws-control pueda evaluar ciGreen."
