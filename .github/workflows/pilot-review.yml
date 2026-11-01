@@ -1,0 +1,14 @@
+name: pilot-review
+on:
+  pull_request:
+    types: [opened, synchronize]
+permissions:
+  pull-requests: write
+jobs:
+  approve:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+        run: gh pr review "$PR" --repo ahvega/distances2 --approve --body "Revision automatica del piloto real de ws-control (ahvega/agent-skills#239): repo desechable; aprueba por forma el diff sintetico del carril. modelo=ws-pilot-actions-review · familia=github-actions"

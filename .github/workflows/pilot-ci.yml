@@ -1,0 +1,10 @@
+name: pilot-ci
+on:
+  push:
+  pull_request:
+jobs:
+  ci:
+    name: ci
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "pilot ci ok"
