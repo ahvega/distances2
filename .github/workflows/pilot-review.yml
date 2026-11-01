@@ -1,9 +1,12 @@
 name: pilot-review
+
 on:
   pull_request:
     types: [opened, synchronize]
+
 permissions:
   pull-requests: write
+
 jobs:
   approve:
     runs-on: ubuntu-latest
